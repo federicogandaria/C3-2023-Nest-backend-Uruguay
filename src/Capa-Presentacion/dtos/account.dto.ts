@@ -8,6 +8,7 @@ export class CreateAccountDto {
    @IsNotEmpty()
     accountType: AccountTypeModel
     
+
     customer: CustomerModel
 
     @IsNumber()

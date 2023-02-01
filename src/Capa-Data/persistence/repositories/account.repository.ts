@@ -91,4 +91,13 @@ export class AccountRepository
     const id = this.database.findIndex((objeto) => (objeto.id = AccountId));
     return this.database[id].state; //entro id
   }
+
+  findByCustomer2(customerId: string): AccountEntity {
+    const currentEntity = this.database.find(
+      (item) => item.customer.id === customerId,
+    );
+    if (currentEntity) return currentEntity;
+    else throw new NotFoundException();
+    
+    }
 }

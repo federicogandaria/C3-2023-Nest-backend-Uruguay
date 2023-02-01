@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import { CustomerRepository, CustomerEntity } from 'src/Capa-Data/persistence';
+import { CustomerRepository, CustomerEntity, AccountRepository } from 'src/Capa-Data/persistence';
 import { CustomerDto } from 'src/Capa-Presentacion/dtos/customer.dto';
 
 
 @Injectable()
 export class CustomerService {
-  constructor(private readonly costumerRepository: CustomerRepository) {}
+  constructor(private readonly costumerRepository: CustomerRepository, private readonly AccountRepository :AccountRepository) {}
   /**
    * Obtener información de un cliente
    *
@@ -15,6 +15,7 @@ export class CustomerService {
    */
   getCustomerInfo(customerId: string): CustomerEntity {
   
+    console.log()
     return this.costumerRepository.findOneById(customerId);
     
   }
@@ -28,7 +29,9 @@ export class CustomerService {
    * @memberof CustomerService
    */
   updatedCustomer(id: string, customer: CustomerDto): CustomerEntity {
-   
+    let account = this.AccountRepository.findByCustomer2(id)
+    customer.id = account.customer.id
+    account.customer =  customer
     return this.costumerRepository.update(id, customer);
   }
 
@@ -48,4 +51,6 @@ export class CustomerService {
     }
     return unsubscribe.state;
   }
+
+  
 }

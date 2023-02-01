@@ -20,4 +20,6 @@ export class SignUpDto {
 
     @IsString()
     password: string;
+
+    accountTypeName: string
 }

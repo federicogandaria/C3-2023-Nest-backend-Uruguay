@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { AccountRepository, AccountEntity, AccountTypeEntity } from 'src/Capa-Data/persistence';
 import { CreateAccountDto } from 'src/Capa-Presentacion/dtos/account.dto';
+import { v4 as uuid } from 'uuid';
 
 
 @Injectable()
@@ -17,6 +18,9 @@ export class AccountService {
    */
   createAccount(account: CreateAccountDto): AccountEntity {
     const newAccount = new AccountEntity();
+    const newAdditionalAccountType = new AccountTypeEntity()
+
+    
     newAccount.customer = account.customer;
     newAccount.balance = account.balance;
     newAccount.accountType = account.accountType;
@@ -58,6 +62,7 @@ export class AccountService {
   removeBalance(accountId: string, amount: number): void {
     
     let accBalance = this.accountRepository.findOneById(accountId);
+    if(accBalance.balance >= amount)
     accBalance.balance = accBalance.balance - amount;
     this.accountRepository.update(accountId, accBalance);
   }
@@ -73,12 +78,12 @@ export class AccountService {
   verifyAmountIntoBalance(accountId: string, amount: number): boolean {
     
    let accBalance = this.accountRepository.findOneById(accountId);
-    if (accBalance.balance > amount) {
+    if (accBalance.balance >= amount) {
       return true;
     }
     return false;
   }
-
+  
   /**
    * Obtener el estado de una cuenta
    *
@@ -127,9 +132,9 @@ export class AccountService {
    * @memberof AccountService
    */
   changeAccountType(accountId: string): AccountTypeEntity {
-    const accBalance = this.accountRepository.findOneById(accountId);
-    accBalance.accountType.id = accountId;
-    return this.accountRepository.update(accountId, accBalance).accountType;
+    const objeto = this.accountRepository.findOneById(accountId);
+    objeto.accountType.id = uuid();
+    return this.accountRepository.update(accountId, objeto).accountType;
   }
 
   /**
@@ -138,7 +143,12 @@ export class AccountService {
    * @param {string} accountId
    * @memberof AccountService
    */
-  deleteAccount(accountId: string): void {
+  deleteAccount(accountId: string, soft?:boolean): void {
     this.accountRepository.delete(accountId);
   }
+
+  findALl(): AccountEntity[] {
+    return this.accountRepository.findAll()
+  }
+
 }

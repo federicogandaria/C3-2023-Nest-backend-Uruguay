@@ -9,7 +9,7 @@ import { CustomerDto } from '../../dtos/customer.dto';
 export class CustomerController {
     constructor (private readonly customerService : CustomerService) {}
 
-    @Get('/:id')
+    @Get('customer/:id')
     getCustomerInfo(@Param('id', ParseUUIDPipe) customerId: string ): CustomerEntity {
         return this.customerService.getCustomerInfo(customerId)
     }

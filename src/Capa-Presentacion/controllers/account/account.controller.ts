@@ -2,6 +2,8 @@ import { Controller, Get, Post, Put, Delete, Param, Body, Query, ParseUUIDPipe }
 import { AccountEntity, AccountTypeEntity } from 'src/Capa-Data/persistence';
 import { AccountService } from 'src/Capa-Negocio/services';
 import { CreateAccountDto } from 'src/Capa-Presentacion/dtos/account.dto';
+import { baseDto } from 'src/Capa-Presentacion/dtos/base.dto';
+import { amountDto } from '../../dtos/amount.dto';
 
 
 
@@ -14,7 +16,7 @@ saludar(){
     console.log("hola")
 }
 
-@Post('new')
+@Post('newAccount')
 createAccount(@Body() account: CreateAccountDto): AccountEntity {
 return this.accountService.createAccount(account);
 }
@@ -25,8 +27,8 @@ return this.accountService.getBalance(accountId);
 }
 
 @Put('add/:accountId')
-addBalance(@Param('accountId', ParseUUIDPipe) accountId: string, @Query('amount') amount: number): void {
-this.accountService.addBalance(accountId, amount);
+addBalance(@Param('accountId', ParseUUIDPipe) accountId: string, @Body() amount: amountDto): void {
+this.accountService.addBalance(accountId, amount.amount);
 }
 
 @Put('remove/:accountId')
@@ -59,8 +61,21 @@ changeAccountType(@Param('accountId', ParseUUIDPipe) accountId: string): Account
 return this.accountService.changeAccountType(accountId);
 }
 
-@Delete(':accountId')
+@Delete('delete/:accountId')
 deleteAccount(@Param('accountId', ParseUUIDPipe) accountId: string): void {
 this.accountService.deleteAccount(accountId);
 }
-}
+
+@Get()
+getAll(){
+  return this.accountService.findALl()
+ }
+
+
+@Put('harddelete/:id')
+hardelete(@Param('id', ParseUUIDPipe) accountId: string,
+@Body() baseDto: baseDto
+): void{
+  return this.accountService.deleteAccount(accountId, baseDto.soft);
+}}
+

@@ -11,15 +11,20 @@ export class SecurityController {
     constructor (private readonly securityService : SecurityService) {}
 
 
-    @Post('newUser')
+    @Post('Up')
     signUp(@Body() signUp: SignUpDto): string{
+        
         return this.securityService.signUp(signUp);
     }
 
-    @Post()
+    @Post('In')
     signIn(@Body() signIn: SignInDto): string{
         return this.securityService.signIn(signIn);
     }
 
+    @Post('sign-out')
+   signOut(@Body() jwt: string) {
+          return  this.securityService.signOut(jwt);
+    } 
 
 }

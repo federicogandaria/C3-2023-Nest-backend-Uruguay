@@ -1,4 +1,6 @@
 import { Injectable } from '@nestjs/common';
+import { PaginationModel } from 'src/Capa-Data/models';
+import { DataRangeModel } from 'src/Capa-Data/models/data-range.model';
 import { DepositRepository, depositEntity } from 'src/Capa-Data/persistence';
 import { DepositDto } from 'src/Capa-Presentacion/dtos/deposit.dto';
 
@@ -41,11 +43,27 @@ export class DepositService {
    */
   
   
-  // Pendiente
-  // getHistory(
-  //   depositId: string, pagination?: PaginationModel, dataRange?: DataRangeModel,): DepositEntity[] {
-  //     let objeto = this.depositRepository.findByAccountType(depositId)
-  //     return objeto
+  getHistory(
+    depositId: string,
+    pagination?: PaginationModel,
+    dataRange?: DataRangeModel,
+  ): depositEntity[] {
+    let deposit = this.depositRepository.findByAccountType(depositId);
 
-  //   }
+    if (dataRange) {
+      let { dateInit, dateEnd = Date.now() } = dataRange;
+      deposit = deposit.filter(
+        (deposit) =>
+          deposit.dateTime >= dateInit &&
+          deposit.dateTime <= dateEnd,
+      );
+    }
+
+    if (pagination) {
+      let { offset = 0, limit = 0 } = pagination;
+      deposit = deposit.slice(offset, offset + limit);
+    }
+    return deposit;
+  }
+
 }
