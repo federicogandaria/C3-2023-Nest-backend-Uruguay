@@ -1,20 +1,23 @@
 import { Injectable } from '@nestjs/common';
 import { TransferRepository, transferEntity } from 'src/Capa-Data/persistence';
+import { DataRangeDto } from 'src/Capa-Presentacion/dtos/dataRange.dto';
+import { PaginationDto } from 'src/Capa-Presentacion/dtos/pagination.dto';
 import { TransferDto } from 'src/Capa-Presentacion/dtos/transfer.dto';
+import { AccountService } from '../account';
+
 
 @Injectable()
 export class TransferService {
-  constructor(private readonly transferRepository: TransferRepository) {}
+  constructor(private readonly transferRepository: TransferRepository,private readonly accountService: AccountService) {}
  
-  createTransfer(transfer: TransferDto): transferEntity { 
-    const newAccount = new transferEntity();
-    newAccount.amount = transfer.amount
-    newAccount.inCome = transfer.inCome
-    newAccount.outCome = transfer.outCome
-    newAccount.reason = transfer.reason
-    newAccount.dateTime = transfer.dateTime
-  
-    return this.transferRepository.register(newAccount);
+   createTransfer(transfer: TransferDto): transferEntity { 
+    const newtransfer = new transferEntity();
+
+    newtransfer.outCome = this.accountService.removeBalance(transfer.outcome.id, transfer.transferAmount)
+    newtransfer.inCome =  this.accountService.addBalance(transfer.income.id, transfer.transferAmount)
+    newtransfer.amount = transfer.transferAmount
+    newtransfer.reason = transfer.transferReason
+    return this.transferRepository.register(newtransfer);
   }
 
   /**
@@ -27,13 +30,19 @@ export class TransferService {
    * @memberof TransferService
    */
 
-  //>>>>>>>>>>>>>PENDIENTEEE<<<<<<<<<<<
-  // getHistoryOut(
-  //   accountId: string,
-  //   pagination?: PaginationModel,
-  //   dataRange?: DataRangeModel,
-  // ): TransferEntity[] {
-  //   let objeto = this.transferRepository.findIncomeByDataRange
+  getHistoryOut(
+    accountId: string,
+    pagination?: PaginationDto,
+    dataRange?: DataRangeDto,
+  ): transferEntity[] {
+  
+    if (!dataRange?.Min || !dataRange?.Max)
+      throw new Error('Invalid Value Range');
+  
+    const transfers = this.transferRepository.findOutcomeByDataRange(accountId,dataRange.Min,dataRange.Max)
+    return transfers.filter(transfer => transfer.dateTime >= dataRange.Min && transfer.dateTime <= dataRange.Max)
+  }
+  
 
   /**
    * Obtener historial de transacciones de entrada en una cuenta
@@ -44,14 +53,20 @@ export class TransferService {
    * @return {*}  {TransferEntity[]}
    * @memberof TransferService
    */
-  //>>>>>>>>>>PENDIENTEEE <<<<<<<<<<<
-  // getHistoryIn(
-  //   accountId: string,
-  //   pagination?: PaginationModel,
-  //   dataRange?: DataRangeModel,
-  // ): TransferEntity[] {
-  //   throw new Error('This method is not implemented');
-  // }
+  
+  getHistoryIn(
+    accountId: string,
+    pagination?: PaginationDto,
+    dataRange?: DataRangeDto,
+  ): transferEntity[] {
+  
+    if (!dataRange?.Min || !dataRange?.Max)
+      throw new Error('Invalid Value Range');
+  
+    const transfers = this.transferRepository.findOutcomeByDataRange(accountId,dataRange.Min,dataRange.Max)
+    return transfers.filter(transfer => transfer.dateTime >= dataRange.Min && transfer.dateTime <= dataRange.Max)
+  }
+  
 
   /**
    * Obtener historial de transacciones de una cuenta
@@ -63,14 +78,20 @@ export class TransferService {
    * @memberof TransferService
    */
 
-  //>>>>>>>>>>>>>>PENDIENTE<<<<<<<<<<<<<<<<<
-  // getHistory(
-  //   accountId: string,
-  //   pagination: PaginationModel,
-  //   dataRange?: DataRangeModel,
-  // ): TransferEntity[] {
-  //   throw new Error('This method is not implemented');
-  // }
+  getHistory(
+    accountId: string,
+    pagination?: PaginationDto,
+    dataRange?: DataRangeDto,
+  ): transferEntity[] {
+  
+    if (!dataRange?.Min || !dataRange?.Max)
+      throw new Error('Invalid Value Range');
+  
+    const transfers = this.transferRepository.findOutcomeByDataRange(accountId,dataRange.Min,dataRange.Max)
+    return transfers.filter(transfer => transfer.dateTime >= dataRange.Min && transfer.dateTime <= dataRange.Max)
+  }
+
+  
 
   /**
    * Borrar una transacción

@@ -19,10 +19,15 @@ export class CustomerController {
         return this.customerService.updatedCustomer(id, customer)
     }
     
-    @Patch('/:id')
+    @Put('unsuscribe/:id')
     unsubscribe(@Param('id', ParseUUIDPipe) id: string): boolean {
         return this.customerService.unsubscribe(id)
     }
+
+    @Get()
+    getAll(){
+      return this.customerService.findALl()
+     }
 
       }
 

@@ -4,21 +4,25 @@ import { AccountService } from 'src/Capa-Negocio/services';
 import { CreateAccountDto } from 'src/Capa-Presentacion/dtos/account.dto';
 import { baseDto } from 'src/Capa-Presentacion/dtos/base.dto';
 import { amountDto } from '../../dtos/amount.dto';
+import { ObservableHandel } from '../../../obs/observable.handle';
+import { NewaccountDto } from '../../dtos/createAccount.dto';
 
 
 
 @Controller('account')
-export class AccountController {
-constructor(private readonly accountService: AccountService) {}
-
-@Get('saludo')
-saludar(){
-    console.log("hola")
+export class AccountController extends ObservableHandel{
+constructor(private readonly accountService: AccountService) {
+  super()
 }
 
-@Post('newAccount')
-createAccount(@Body() account: CreateAccountDto): AccountEntity {
-return this.accountService.createAccount(account);
+
+@Post('create')
+createAccount(@Body() account: NewaccountDto): AccountEntity {
+  const newAccount =  this.accountService.newAccountType(account);
+  this.handle(account).subscribe(value => {
+    console.log(`Nueva cuenta creada: ${ JSON.stringify (account)}`)
+  })
+  return newAccount
 }
 
 @Get('balance/:accountId')
@@ -61,10 +65,12 @@ changeAccountType(@Param('accountId', ParseUUIDPipe) accountId: string): Account
 return this.accountService.changeAccountType(accountId);
 }
 
-@Delete('delete/:accountId')
-deleteAccount(@Param('accountId', ParseUUIDPipe) accountId: string): void {
-this.accountService.deleteAccount(accountId);
-}
+@Put('delete/:id')
+    deleteAccount(@Param('id') accountId: string): void {
+        //deleteAccount(@Param('accountId')accountId: string,  sof?: boolean): void {
+
+        this.accountService.deleteAccount(accountId, false)
+    }
 
 @Get()
 getAll(){
@@ -74,8 +80,8 @@ getAll(){
 
 @Put('harddelete/:id')
 hardelete(@Param('id', ParseUUIDPipe) accountId: string,
-@Body() baseDto: baseDto
+@Query('soft') soft?: boolean
 ): void{
-  return this.accountService.deleteAccount(accountId, baseDto.soft);
+  return this.accountService.deleteAccount(accountId,soft);
 }}
 

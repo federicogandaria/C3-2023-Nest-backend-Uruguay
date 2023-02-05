@@ -29,15 +29,21 @@ export class AccountRepository
   }
 
   delete(id: string, soft?: boolean): void {
-    if (soft === undefined) {
-      const index = this.database.findIndex((item) => item.id === id);
-      this.softDelete(index);
-    } else {
-      const index = this.database.findIndex(
-        (item) => item.id === id && (item.deletedAt ?? true) === true,
-      );
-      this.hardDelete(index); // le paso el index para que llame a la funcion
+    
+    const index = this.database.findIndex((item) => item.id === id);
+    
+    console.log(id)
+    
+    if (index == -1) {
+      throw new Error('No se encontraron elementos');
     }
+    if (!soft) {
+      this.softDelete(index)
+
+    } else {
+      this.hardDelete(index)
+    } 
+
   }
 
   private hardDelete(index: number): void {
@@ -45,11 +51,14 @@ export class AccountRepository
   }
 
   private softDelete(index: number): void {
-    this.database[index].deletedAt = Date.now();
+    this.database[index].deletedAt = Date.now()
+
   }
 
+
+
   findAll(): AccountEntity[] {
-    return this.database.filter((item) => item.deletedAt === undefined);
+    return this.database
   }
 
   findOneById(id: string): AccountEntity {

@@ -36,6 +36,8 @@ export class DepositRepository
       const index = this.database.findIndex((item) => item.id === id);
       this.hardDelete(index); // le paso el index para que llame a la funcion
     }
+
+    
   }
   findAll(): depositEntity[] {
     return this.database.filter((item) => item.deletedAt === undefined);

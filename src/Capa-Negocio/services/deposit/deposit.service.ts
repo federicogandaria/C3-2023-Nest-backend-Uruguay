@@ -1,13 +1,18 @@
 import { Injectable } from '@nestjs/common';
 import { PaginationModel } from 'src/Capa-Data/models';
 import { DataRangeModel } from 'src/Capa-Data/models/data-range.model';
-import { DepositRepository, depositEntity } from 'src/Capa-Data/persistence';
+import { DepositRepository, depositEntity, AccountEntity } from 'src/Capa-Data/persistence';
 import { DepositDto } from 'src/Capa-Presentacion/dtos/deposit.dto';
+import { AccountRepository } from '../../../Capa-Data/persistence/repositories/account.repository';
+import { AccountService } from '../account/account.service';
+
 
 
 @Injectable()
 export class DepositService {
-  constructor(private readonly depositRepository: DepositRepository) {}
+  constructor(private readonly depositRepository: DepositRepository,
+    private readonly AccountRepository: AccountRepository,
+    private readonly AccountService: AccountService) {}
   /**
    * Crear un deposito
    *
@@ -16,8 +21,17 @@ export class DepositService {
    * @memberof DepositService
    */
   createDeposit(deposit: DepositDto): depositEntity {
-    const newDeposit = new depositEntity(); 
-    newDeposit.account = deposit.account;
+    const newDeposit = new depositEntity();
+    const account = this.AccountRepository.findOneById(deposit.accountId)
+    newDeposit.account = new AccountEntity()
+    newDeposit.account.accountType  = account.accountType
+    newDeposit.amount = deposit.amount;
+    newDeposit.dateTime = new Date();
+    newDeposit.state = true;
+    newDeposit.account.id  = deposit.accountId
+
+    console.log(newDeposit);
+    this.AccountService.addBalance(deposit.accountId, deposit.amount)
     return this.depositRepository.register(newDeposit);
   }
 
@@ -28,8 +42,8 @@ export class DepositService {
    * @memberof DepositService
    */
   deleteDeposit(depositId: string): void {
-    this.deleteDeposit(depositId);
-    // this.accountRepository.delete(accountId)
+    
+    this.depositRepository.delete(depositId)
   }
 
   /**

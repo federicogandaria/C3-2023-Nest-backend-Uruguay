@@ -1,6 +1,7 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { AccountRepository, AccountEntity, AccountTypeEntity } from 'src/Capa-Data/persistence';
 import { CreateAccountDto } from 'src/Capa-Presentacion/dtos/account.dto';
+import { NewaccountDto } from 'src/Capa-Presentacion/dtos/createAccount.dto';
 import { v4 as uuid } from 'uuid';
 
 
@@ -45,11 +46,11 @@ export class AccountService {
    * @param {number} amount
    * @memberof AccountService
    */
-  addBalance(accountId: string, amount: number): void {
+  addBalance(accountId: string, amount: number): AccountEntity {
     
     let accBalance = this.accountRepository.findOneById(accountId);
     accBalance.balance = accBalance.balance + amount;
-    this.accountRepository.update(accountId, accBalance);
+    return this.accountRepository.update(accountId, accBalance);
   }
 
   /**
@@ -59,12 +60,18 @@ export class AccountService {
    * @param {number} amount
    * @memberof AccountService
    */
-  removeBalance(accountId: string, amount: number): void {
+  removeBalance(accountId: string, amount: number): AccountEntity {
     
     let accBalance = this.accountRepository.findOneById(accountId);
-    if(accBalance.balance >= amount)
+    if(accBalance.balance >= amount){
     accBalance.balance = accBalance.balance - amount;
-    this.accountRepository.update(accountId, accBalance);
+   return this.accountRepository.update(accountId, accBalance);
+  }
+
+   else
+   {
+     throw new NotFoundException ("Account not balance in account")
+   }
   }
 
   /**
@@ -143,12 +150,30 @@ export class AccountService {
    * @param {string} accountId
    * @memberof AccountService
    */
-  deleteAccount(accountId: string, soft?:boolean): void {
-    this.accountRepository.delete(accountId);
-  }
+  deleteAccount(accountId: string, sof?: boolean): void {
+    this.accountRepository.delete(accountId, sof)
+}
 
   findALl(): AccountEntity[] {
     return this.accountRepository.findAll()
+  }
+
+  newAccountType(account: NewaccountDto): AccountEntity {
+
+    const newAccount = new AccountEntity();
+    const accountType = new AccountTypeEntity();
+
+    accountType.id = account.accountTypeId;
+    accountType.name = account.name
+    newAccount.accountType = accountType;
+
+    const customer = this.accountRepository.findOneById(account.accountId)
+    newAccount.customer = customer.customer;
+    newAccount.balance = 0;
+    newAccount.state = true;
+
+    
+    return this.accountRepository.register(newAccount);
   }
 
 }
