@@ -8,6 +8,7 @@ import { CustomerRepository, DocumentTypeEntity, CustomerEntity , AccountEntity,
 import { SignInDto } from 'src/Capa-Presentacion/dtos/sign-in.dto';
 import { SignUpDto } from 'src/Capa-Presentacion/dtos/sign-up.dto';
 
+
 // Data transfer objects
 
 // Models
@@ -23,22 +24,31 @@ import { DocumentTypeRepository } from '../../../Capa-Data/persistence/repositor
 // Entities
 
 import * as jwt from "jsonwebtoken"
+import { AccountRepository } from '../../../Capa-Data/persistence/repositories/account.repository';
 
 @Injectable()
 export class SecurityService {
   constructor(
     private readonly customerRepository: CustomerRepository,
     private readonly accountService: AccountService,
-    private readonly documentTypeRepository : DocumentTypeRepository
+    private readonly documentTypeRepository : DocumentTypeRepository,
+    private readonly accountRepository: AccountRepository
   ) {}
 
 
-  signIn(user: SignInDto): string {
+  signIn(user: SignInDto): {token:string} {
     const answer = this.customerRepository.findOneByEmailAndPassword(
       user.email,
       user.password,
     );
-    if (answer) return jwt.sign(user, process.env.TOKEN_SECRET || "tokentest")
+    
+    if (answer) { 
+      
+      let id = this.customerRepository.findOneByEmailAndPasswordID(user.email, user.password);
+      let accountUser = this.accountRepository.findByCustomer2(id)
+      const token = jwt.sign({accountUser}, process.env.TOKEN_SECRET || "tokentest")
+  return {token} }
+    
     //'Falta retornar un JWT';
     else throw new UnauthorizedException("User Incorrect");
   }
@@ -69,8 +79,14 @@ export class SecurityService {
       const account = this.accountService.createAccount(newAccount);
       console.log(account)
 
-      if (account)
+
+      
+
+      if (account){
       return jwt.sign({ id: customer.id },   process.env.TOKEN_SECRET || "tokentest");
+      
+      }
+      
       else throw new InternalServerErrorException();
     } else throw new InternalServerErrorException();
   }

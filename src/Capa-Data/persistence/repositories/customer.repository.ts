@@ -101,4 +101,16 @@ export class CustomerRepository
     );
     return nombrec;
   }
-}
+
+  findOneByEmailAndPasswordID(email: string, password: string): string {
+    const indexCurrentEntity = this.database.findIndex(
+      (item) =>
+        item.email === email &&
+        item.password === password ,
+    );
+
+      let customer = this.database[indexCurrentEntity]
+    return customer.id 
+  }
+ }
+

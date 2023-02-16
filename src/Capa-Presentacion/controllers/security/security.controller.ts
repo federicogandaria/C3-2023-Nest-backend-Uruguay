@@ -11,14 +11,14 @@ export class SecurityController {
     constructor (private readonly securityService : SecurityService) {}
 
 
-    @Post('signup')
+    @Post('singup')
     signUp(@Body() signUp: SignUpDto): string{
         
         return this.securityService.signUp(signUp);
     }
 
-    @Post('signin')
-    signIn(@Body() signIn: SignInDto): string{
+    @Post('singin')
+    signIn(@Body() signIn: SignInDto):  {token:string}{
         return this.securityService.signIn(signIn);
     }
 
